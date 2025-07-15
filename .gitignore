@@ -35,3 +35,5 @@ tasuku_llm_docs_parser-*.tar
 npm-debug.log
 /assets/node_modules/
 
+*.env
+

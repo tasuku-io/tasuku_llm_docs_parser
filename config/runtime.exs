@@ -20,6 +20,24 @@ if System.get_env("PHX_SERVER") do
   config :tasuku_llm_docs_parser, TasukuLlmDocsParserWeb.Endpoint, server: true
 end
 
+# Load environment variables from .env file manually
+if File.exists?(".env") do
+  File.read!(".env")
+  |> String.split("\n", trim: true)
+  |> Enum.reject(&String.starts_with?(&1, "#"))
+  |> Enum.each(fn line ->
+    case String.split(line, "=", parts: 2) do
+      [key, value] when key != "" and value != "" ->
+        System.put_env(key, value)
+      _ ->
+        :ok
+    end
+  end)
+end
+
+config :netsuke_agents,
+  api_key: System.get_env("OPENAI_API_KEY")
+
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you

@@ -54,7 +54,8 @@ defmodule TasukuLlmDocsParser.MixProject do
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:netsuke_agents, git: "https://github.com/tasuku-io/netsuke_agents", tag: "v0.0.1-alpha.6"}
     ]
   end
 
