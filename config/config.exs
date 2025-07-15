@@ -9,7 +9,7 @@ import Config
 
 config :tasuku_llm_docs_parser,
   generators: [timestamp_type: :utc_datetime],
-  llm_parser: TasukuLlmDocsParser.LlmParser.Mock
+  llm_parser: TasukuLlmDocsParser.LlmParser.AgentParser
 
 # Configures the endpoint
 config :tasuku_llm_docs_parser, TasukuLlmDocsParserWeb.Endpoint,

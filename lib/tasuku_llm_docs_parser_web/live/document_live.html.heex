@@ -1,30 +1,86 @@
-<div class="max-w-3xl mx-auto p-6">
-  <h1 class="text-3xl font-bold mb-4">LLM-Optimized Doc Parser</h1>
+<div class="mx-auto p-2">
+  <h1 class="text-2xl font-semibold my-6 text-center">LLM-Optimized Doc Parser</h1>
 
-  <.form for={%{}} phx-submit="parse">
-    <div class="mb-4">
-      <textarea
-        name="doc"
-        rows="12"
-        class="w-full border rounded p-2"
-        placeholder="Paste your API documentation here…"
-      ><%= @raw_doc %></textarea>
+  <div class="">
+    <!-- Left side - Input -->
+    <div class="flex flex-col">
+      <h2 class="text-xl font-semibold mb-4">Input</h2>
+      <.form for={%{}} phx-submit="parse" class="flex flex-col h-full">
+        <div class="flex-1 mb-3">
+          <textarea
+            name="doc"
+            rows="12"
+            class="w-full h-full border rounded p-3 resize-none font-mono text-sm bg-zinc-900 text-green-400 border-gray-700"
+            placeholder="Paste your API documentation here…"
+          ><%= @raw_doc %></textarea>
+        </div>
+        <button 
+          type="submit" 
+          class={"px-6 py-3 text-white rounded transition-colors #{if @processing, do: "bg-red-400 cursor-not-allowed", else: "bg-red-500 hover:bg-red-400"}"}
+          disabled={@processing}
+        >
+          <%= if @processing do %>
+            Processing...
+          <% else %>
+            Parse Documentation
+          <% end %>
+        </button>
+      </.form>
+
+      <%= if @error do %>
+        <div class="mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
+          <strong>Error:</strong> <%= @error %>
+        </div>
+      <% end %>
     </div>
-    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Parse</button>
-  </.form>
 
-  <%= if @error do %>
-    <div class="mt-4 text-red-600">Error: <%= @error %></div>
-  <% end %>
-
-  <%= if @result do %>
-    <div class="mt-8">
-      <h2 class="text-2xl font-semibold"><%= @result.title %></h2>
-      <ul class="list-disc pl-5 mt-3 space-y-1">
-        <%= for %{text: sec} <- @result.sections do %>
-          <li><%= sec %></li>
+    <!-- Right side - Output -->
+    <div class="flex flex-col mt-4">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Output</h2>
+        <%= if @result do %>
+          <button 
+            type="button"
+            phx-click="copy_to_clipboard"
+            class={"px-3 py-1 text-sm rounded transition-colors flex items-center gap-2 #{if @copied, do: "bg-green-800 text-green-200", else: "bg-green-600 text-white hover:bg-green-700"}"}
+            title="Copy to clipboard"
+          >
+            <%= if @copied do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Copied!
+            <% else %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy
+            <% end %>
+          </button>
         <% end %>
-      </ul>
+      </div>
+      <div class="flex-1 border rounded p-4 bg-zinc-900 text-gray-300 overflow-y-auto font-mono text-sm border-gray-700" id="output-area" phx-hook="CopyToClipboard">
+        <%= cond do %>
+          <% @processing -> %>
+            <div class="text-red-400 text-center my-8 font-sans">
+              <div class="inline-flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </div>
+              <p class="text-sm mt-2 text-gray-400">Parsing your documentation...</p>
+            </div>
+          <% @result -> %>
+            <pre><code class="language-json text-green-400"><%= Jason.encode!(@result, pretty: true) %></code></pre>
+          <% true -> %>
+            <div class="text-gray-500 text-center my-8 font-sans">
+              <p>Parsed documentation will appear here</p>
+              <p class="text-sm mt-2">Enter your API documentation on the left and click "Parse Documentation"</p>
+            </div>
+        <% end %>
+      </div>
     </div>
-  <% end %>
+  </div>
 </div>

@@ -1,4 +1,4 @@
-defmodule TasukuLlmDocsParser.LLMParser do
+defmodule TasukuLlmDocsParser.LlmParser do
   @moduledoc """
   Behaviour for parsing raw docs into LLM-optimized structure.
   """
