@@ -2,7 +2,7 @@ defmodule TasukuLlmDocsParserWeb.Router do
   use TasukuLlmDocsParserWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
+    plug :accepts, ["html", "json"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {TasukuLlmDocsParserWeb.Layouts, :root}
@@ -16,14 +16,13 @@ defmodule TasukuLlmDocsParserWeb.Router do
 
   scope "/", TasukuLlmDocsParserWeb do
     pipe_through :browser
-
-    get "/", PageController, :home
+    live "/", DocumentLive, :index
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", TasukuLlmDocsParserWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", TasukuLlmDocsParserWeb do
+    pipe_through :api
+    post "/docs", DocumentController, :create
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:tasuku_llm_docs_parser, :dev_routes) do

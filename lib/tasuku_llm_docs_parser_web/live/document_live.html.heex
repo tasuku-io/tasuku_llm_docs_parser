@@ -1,0 +1,30 @@
+<div class="max-w-3xl mx-auto p-6">
+  <h1 class="text-3xl font-bold mb-4">LLM-Optimized Doc Parser</h1>
+
+  <.form for={%{}} phx-submit="parse">
+    <div class="mb-4">
+      <textarea
+        name="doc"
+        rows="12"
+        class="w-full border rounded p-2"
+        placeholder="Paste your API documentation here…"
+      ><%= @raw_doc %></textarea>
+    </div>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Parse</button>
+  </.form>
+
+  <%= if @error do %>
+    <div class="mt-4 text-red-600">Error: <%= @error %></div>
+  <% end %>
+
+  <%= if @result do %>
+    <div class="mt-8">
+      <h2 class="text-2xl font-semibold"><%= @result.title %></h2>
+      <ul class="list-disc pl-5 mt-3 space-y-1">
+        <%= for %{text: sec} <- @result.sections do %>
+          <li><%= sec %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>
