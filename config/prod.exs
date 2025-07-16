@@ -7,7 +7,10 @@ import Config
 # before starting your production server.
 config :tasuku_llm_docs_parser, TasukuLlmDocsParserWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json",
-  url: [host: "tools.tasuku.io", scheme: "https", port: 443],
+  http: [port: {:system, "PORT"}],
+  url: [host: "tools.tasuku.io", port: 443, scheme: "https"],
+  check_origin: ["https://tools.tasuku.io"],
+  secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE"),
   server: true
 
 
