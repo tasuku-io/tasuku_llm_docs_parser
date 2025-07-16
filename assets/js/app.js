@@ -65,7 +65,7 @@ Hooks.CodeMirror = {
           }),
           EditorView.theme({
             "&": {
-              height: "400px"
+              height: "40vh"
             },
             ".cm-scroller": {
               fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', monospace"
@@ -137,7 +137,7 @@ Hooks.CodeMirrorOutput = {
             EditorView.editable.of(false), // Make it read-only
             EditorView.theme({
               "&": {
-                height: "600px"
+                height: "60vh"
               },
               ".cm-scroller": {
                 fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', monospace"

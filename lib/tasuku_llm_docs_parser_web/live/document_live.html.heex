@@ -1,11 +1,11 @@
 <div class="mx-auto p-2">
-  <h1 class="text-2xl font-semibold my-6 text-center">LLM-Optimized Doc Parser</h1>
+  <h1 class="md:text-2xl text-lg font-semibold my-6 text-center">LLM-Optimized Doc Parser</h1>
 
   <div class="">
     <!-- Top - Input (hidden when result is shown) -->
     <%= if (not @processing and is_nil(@result)) do %>
       <div class="flex flex-col">
-        <h2 class="text-xl font-semibold mb-4">Input</h2>
+        <h2 class="md:text-xl text-md font-semibold mb-4">Input</h2>
         <.form for={%{}} phx-submit="parse" class="flex flex-col h-full">
           <div class="flex-1 mb-3">
             <div id="input-editor" phx-hook="CodeMirror">
@@ -17,7 +17,7 @@
           </div>
           <button 
             type="submit" 
-            class={"px-6 py-3 text-white rounded transition-colors #{if @processing, do: "bg-red-400 cursor-not-allowed", else: "bg-red-500 hover:bg-red-400"}"}
+            class={"px-6 py-2 text-white rounded transition-colors #{if @processing, do: "bg-red-400 cursor-not-allowed", else: "bg-red-500 hover:bg-red-400"}"}
             disabled={@processing}
           >
             Parse Documentation
@@ -35,7 +35,7 @@
     <!-- Bottom - Output -->
     <div class="flex flex-col mt-4">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold">Output</h2>
+        <h2 class="md:text-xl text-md font-semibold">Output</h2>
         <%= if @result do %>
           <div class="flex gap-2">
             <button 
