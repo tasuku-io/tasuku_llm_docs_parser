@@ -22,13 +22,147 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+// Import CodeMirror
+import {EditorView, basicSetup} from "codemirror"
+import {EditorState} from "@codemirror/state"
+import {markdown} from "@codemirror/lang-markdown"
+import {json} from "@codemirror/lang-json"
+import {oneDark} from "@codemirror/theme-one-dark"
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
 // Define hooks for LiveView
 let Hooks = {}
 
+Hooks.CodeMirror = {
+  mounted() {
+    // Find the textarea within this hook element
+    const textarea = this.el.querySelector('textarea')
+    if (!textarea) return
+    
+    // Create a hidden textarea for form submission
+    this.hiddenTextarea = document.createElement('textarea')
+    this.hiddenTextarea.name = textarea.name
+    this.hiddenTextarea.style.display = 'none'
+    this.hiddenTextarea.value = textarea.value
+    this.el.appendChild(this.hiddenTextarea)
+    
+    // Create CodeMirror editor
+    this.editor = new EditorView({
+      state: EditorState.create({
+        doc: textarea.value,
+        extensions: [
+          basicSetup,
+          markdown(),
+          oneDark,
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged) {
+              // Update the hidden textarea when content changes
+              this.hiddenTextarea.value = this.editor.state.doc.toString()
+              // Dispatch input event to notify LiveView
+              this.hiddenTextarea.dispatchEvent(new Event('input', { bubbles: true }))
+            }
+          }),
+          EditorView.theme({
+            "&": {
+              height: "400px"
+            },
+            ".cm-scroller": {
+              fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', monospace"
+            }
+          })
+        ]
+      }),
+      parent: this.el
+    })
+    
+    // Remove the original textarea
+    textarea.remove()
+    
+    // Store the current content to prevent unnecessary updates
+    this.lastValue = this.hiddenTextarea.value
+  },
+  
+  updated() {
+    // Only update if the external value actually changed and differs from editor content
+    const currentEditorContent = this.editor ? this.editor.state.doc.toString() : ''
+    const newValue = this.hiddenTextarea ? this.hiddenTextarea.value : ''
+    
+    if (this.editor && newValue !== this.lastValue && newValue !== currentEditorContent) {
+      this.editor.dispatch({
+        changes: {
+          from: 0,
+          to: this.editor.state.doc.length,
+          insert: newValue
+        }
+      })
+      this.lastValue = newValue
+    }
+  },
+  
+  destroyed() {
+    if (this.editor) {
+      this.editor.destroy()
+    }
+  }
+}
+
+Hooks.CodeMirrorOutput = {
+  mounted() {
+    this.createEditor()
+  },
+  
+  updated() {
+    this.createEditor()
+  },
+  
+  createEditor() {
+    // Destroy existing editor if it exists
+    if (this.editor) {
+      this.editor.destroy()
+    }
+    
+    // Get the content from the data attribute
+    const content = this.el.dataset.content || ""
+    
+    if (content) {
+      // Create read-only CodeMirror editor for JSON output
+      this.editor = new EditorView({
+        state: EditorState.create({
+          doc: content,
+          extensions: [
+            basicSetup,
+            json(),
+            oneDark,
+            EditorView.editable.of(false), // Make it read-only
+            EditorView.theme({
+              "&": {
+                height: "600px"
+              },
+              ".cm-scroller": {
+                fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', monospace"
+              },
+              ".cm-content": {
+                padding: "12px"
+              }
+            })
+          ]
+        }),
+        parent: this.el
+      })
+    }
+  },
+  
+  destroyed() {
+    if (this.editor) {
+      this.editor.destroy()
+    }
+  }
+}
+
 Hooks.CopyToClipboard = {
   mounted() {
+    // This hook is now on the copy button, not the output area
     this.handleEvent("copy_to_clipboard", ({text}) => {
       navigator.clipboard.writeText(text).then(() => {
         // Show temporary success feedback

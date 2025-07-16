@@ -43,7 +43,20 @@ defmodule TasukuLlmDocsParserWeb.DocumentLive do
   end
 
   @impl true
+  def handle_event("new_document", _params, socket) do
+    {:noreply,
+     assign(socket,
+       raw_doc: "",
+       result: nil,
+       error: nil,
+       processing: false,
+       copied: false
+     )}
+  end
+
+  @impl true
   def handle_info({:parse_document, raw}, socket) do
+    IO.inspect(String.trim(raw), label: "Parsing document")
     case @parser.parse(raw) do
       {:ok, optimized} ->
         {:noreply,
@@ -53,21 +66,14 @@ defmodule TasukuLlmDocsParserWeb.DocumentLive do
            error: nil,
            processing: false
          )}
-      _->
-      {:noreply,
-        assign(socket,
-          error: "Failed to parse document",
-          result: nil,
-          processing: false
-        )}
-
-      # {:error, err} ->
-      #   {:noreply,
-      #    assign(socket,
-      #      error: err,
-      #      result: nil,
-      #      processing: false
-      #    )}
+      {:error, err} ->
+        {:noreply,
+         assign(socket,
+          raw_doc: raw,
+           error: "Failed to parse document: #{err}",
+           result: nil,
+           processing: false
+         )}
     end
   end
 
